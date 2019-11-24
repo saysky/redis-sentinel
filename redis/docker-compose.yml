@@ -1,0 +1,38 @@
+version: '2'
+services:
+  master:
+    image: redis
+    container_name: redis-master
+    command: redis-server --requirepass 123456 --appendonly yes
+    ports:
+    - "6379:6379"
+    volumes:
+    - "./redis-master/data:/data"
+    networks:
+    - sentinel-master
+  slave1:
+    image: redis    
+    container_name: redis-slave-1
+    command: redis-server --slaveof redis-master 6379 --requirepass 123456 --masterauth 123456 --appendonly yes
+    ports:
+    - "6380:6379"
+    volumes:
+    - "./redis-slave-1/data:/data"
+    depends_on:
+    - master
+    networks:
+    - sentinel-master
+  slave2:
+    image: redis
+    container_name: redis-slave-2
+    command: redis-server --slaveof redis-master 6379 --requirepass 123456 --masterauth 123456  --appendonly yes
+    ports:
+    - "6381:6379" 
+    volumes:
+    - "./redis-slave-2/data:/data"
+    depends_on:
+    - master
+    networks:
+    - sentinel-master
+networks:
+  sentinel-master:
